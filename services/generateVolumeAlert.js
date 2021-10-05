@@ -1,5 +1,6 @@
 const { binanceusdm } = require("./connectExchange");
 const { bot } = require("./connectTelegram");
+const VolumeAlert = require("../models/VolumeAlert");
 
 ////////////////////// usage //////////////////////////////////////////
 // * it's monitoring binanceusdmm exchange volume only
@@ -38,7 +39,7 @@ async function getVolume(symbol, interval, limit, percentage) {
     const averageVolume = totalVolume / limit;
 
     // console.log(
-    //   `${symbol} @ ${closePrice} || total: ${totalVolume} average: ${averageVolume} latest: ${latestVolume} now: ${nowVolume}`
+    //   `${symbol} @ ${closePrice} || total: ${totalVolume} average: ${averageVolume} latest: ${latestVolume}`
     // );
     return { totalVolume, latestVolume, averageVolume, closePrice };
   } catch (error) {
@@ -81,7 +82,7 @@ async function generateVolumeAlert(symbol, interval, limit, percentage) {
 
     if (
       isVolumeIncreasedBy50x &&
-      isBtcVolumeIncreasedBy10x &&
+      !isBtcVolumeIncreasedBy10x &&
       isConsiderationLargerThan500k
     ) {
       // generate message to telegram
@@ -103,8 +104,27 @@ async function generateVolumeAlert(symbol, interval, limit, percentage) {
 
       bot.sendMessage("@tradeblocks_bot", content);
       console.log(
-        `${symbol} >> total: ${totalVolume} average: ${averageVolume} latest: ${latestVolume} now: ${nowVolume}`
+        `${symbol} >> total: ${totalVolume} average: ${averageVolume} latest: ${latestVolume}`
       );
+
+      // save record to database
+      console.log(`***** Saving ${symbol} volume alert *****`);
+
+      const volumeAlert = new VolumeAlert({
+        symbol: symbol,
+        closePrice: closePrice,
+        totalVolume: totalVolume,
+        averageVolume: averageVolume,
+        latestVolume: latestVolume,
+        btcAverageVolume: btcAverageVolume,
+        btcLatestVolume: btcLatestVolume,
+        isVolumeIncreasedBy50x: isVolumeIncreasedBy50x,
+        isBtcVolumeIncreasedBy10x: isBtcVolumeIncreasedBy10x,
+        isConsiderationLargerThan500k: isConsiderationLargerThan500k,
+      });
+
+      await volumeAlert.save();
+      console.log(`>> saving finished!`);
     } else {
       console.log(
         `volume : ${isVolumeIncreasedBy50x} || btc : ${isBtcVolumeIncreasedBy10x} || consideration : ${isConsiderationLargerThan500k}`

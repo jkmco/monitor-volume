@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAllAppConfig,
   getAppConfig,
+  getAppConfigValue,
   saveAppConfig,
   deleteAppConfig,
 } = require("../services/appConfigService");
@@ -16,7 +17,7 @@ router.get("/", async (req, res) => {
 
 // get value by key
 router.get("/:key", async (req, res) => {
-  const result = await getAppConfig(req.params.key);
+  const result = await getAppConfigValue(req.params.key);
   res.json(result);
 });
 
