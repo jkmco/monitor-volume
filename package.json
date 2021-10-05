@@ -1,0 +1,22 @@
+{
+  "name": "server-base",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.4",
+    "ccxt": "^1.57.11",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^6.0.8",
+    "node-cron": "^3.0.0",
+    "node-telegram-bot-api": "^0.54.0"
+  }
+}
