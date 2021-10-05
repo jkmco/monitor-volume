@@ -127,7 +127,7 @@ async function generateVolumeAlert(symbol, interval, limit, percentage) {
       console.log(`>> saving finished!`);
     } else {
       console.log(
-        `volume : ${isVolumeIncreasedBy50x} || btc : ${isBtcVolumeIncreasedBy10x} || consideration : ${isConsiderationLargerThan500k}`
+        `${symbol} volume : ${isVolumeIncreasedBy50x} || btc : ${isBtcVolumeIncreasedBy10x} || consideration : ${isConsiderationLargerThan500k}`
       );
     }
   } catch (error) {

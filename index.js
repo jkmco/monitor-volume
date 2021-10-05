@@ -2,7 +2,6 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const axios = require("axios");
 
 // dotenv config
 require("dotenv").config();
@@ -23,6 +22,7 @@ require("./startup/db")(DB_URI);
 
 // main
 const { generateVolumeAlert } = require("./services/generateVolumeAlert");
+const { getAppConfigValue } = require("./services/appConfigService");
 const cron = require("node-cron");
 
 const symbolList = require("./services/getSymbolList");
@@ -43,41 +43,15 @@ async function init() {
 
   // load app config
   console.log(">> loading app config >>");
-  let interval = 0;
-  let limit = 0;
-  let percentage = 0;
 
-  await axios
-    .get(`${API_URI}/app/config/monitor-volume-interval`)
-    .then((result) => {
-      interval = result.data || "1m";
-      console.log(`>> loading app config : interval ${interval} loaded! >>`);
-    })
-    .catch((err) => {
-      `error loading app config: ${err}`;
-    });
-  await axios
-    .get(`${API_URI}/app/config/monitor-volume-limit`)
-    .then((result) => {
-      limit = parseInt(result.data) || 32;
-      console.log(`>> loading app config : limit ${limit} loaded! >>`);
-    })
-    .catch((err) => {
-      `error loading app config: ${err}`;
-    });
-  await axios
-    .get(`${API_URI}/app/config/monitor-volume-percentage`)
-    .then((result) => {
-      percentage = parseInt(result.data) || 50;
-      console.log(
-        `>> loading app config : percentage ${percentage} loaded! >>`
-      );
-    })
-    .catch((err) => {
-      `error loading app config: ${err}`;
-    });
+  const interval = (await getAppConfigValue("monitor-volume-interval")) || "1m";
+  const limit = (await getAppConfigValue("monitor-volume-limit")) || 32;
+  const percentage =
+    (await getAppConfigValue("monitor-volume-percentage")) || 50;
 
-  console.log(`>> app config loaded! interval >>`);
+  console.log(
+    `>> app config loaded! interval ${interval} / limit ${limit} / % ${percentage}  >>`
+  );
 
   // start to run
 
@@ -91,8 +65,8 @@ async function init() {
       await generateVolumeAlert(
         symbolList[i].symbol,
         interval,
-        limit,
-        percentage
+        parseInt(limit),
+        parseInt(percentage)
       ); // alert when have 50x volume occur
     }
     await console.log(">> finished getting volume!");
